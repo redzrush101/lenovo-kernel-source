@@ -335,6 +335,10 @@ static int ext4_ioctl_setproject(struct file *filp, __u32 projid)
 	if (IS_NOQUOTA(inode))
 		goto out_unlock;
 
+	err = dquot_initialize(inode);
+	if (err)
+		goto out_unlock;
+
 	err = ext4_get_inode_loc(inode, &iloc);
 	if (err)
 		goto out_unlock;
@@ -348,7 +352,6 @@ static int ext4_ioctl_setproject(struct file *filp, __u32 projid)
 	brelse(iloc.bh);
 
 	dquot_initialize(inode);
-
 	handle = ext4_journal_start(inode, EXT4_HT_QUOTA,
 		EXT4_QUOTA_INIT_BLOCKS(sb) +
 		EXT4_QUOTA_DEL_BLOCKS(sb) + 3);

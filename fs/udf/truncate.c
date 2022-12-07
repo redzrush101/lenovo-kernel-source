@@ -127,9 +127,10 @@ void udf_discard_prealloc(struct inode *inode)
 	int8_t etype = -1, netype;
 	int adsize;
 	struct udf_inode_info *iinfo = UDF_I(inode);
+	int bsize = 1 << inode->i_blkbits;
 
 	if (iinfo->i_alloc_type == ICBTAG_FLAG_AD_IN_ICB ||
-	    inode->i_size == iinfo->i_lenExtents)
+	    ALIGN(inode->i_size, bsize) == ALIGN(iinfo->i_lenExtents, bsize))
 		return;
 
 	if (iinfo->i_alloc_type == ICBTAG_FLAG_AD_SHORT)

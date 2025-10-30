@@ -62,20 +62,26 @@
 #include <linux/types.h>
 #include <linux/param.h>
 
+/* Fallback entropy helper if get_cycles() is unavailable */
+unsigned long random_get_entropy_fallback(void);
+
 #include <asm/timex.h>
 
 #ifndef random_get_entropy
 /*
  * The random_get_entropy() function is used by the /dev/random driver
- * in order to extract entropy via the relative unpredictability of
- * when an interrupt takes places versus a high speed, fine-grained
- * timing source or cycle counter.  Since it will be occurred on every
- * single interrupt, it must have a very low cost/overhead.
+ * to extract entropy via the relative unpredictability of interrupt
+ * timing against a fine-grained cycle counter. It must be very low
+ * overhead as it can run on every interrupt.
  *
- * By default we use get_cycles() for this purpose, but individual
- * architectures may override this in their asm/timex.h header file.
+ * Prefer get_cycles() when provided by the architecture. If unavailable,
+ * fall back to random_get_entropy_fallback().
  */
-#define random_get_entropy()	get_cycles()
+#ifdef get_cycles
+#define random_get_entropy()    ((unsigned long)get_cycles())
+#else
+#define random_get_entropy()    random_get_entropy_fallback()
+#endif
 #endif
 
 /*

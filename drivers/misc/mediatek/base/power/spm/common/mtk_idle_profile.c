@@ -12,6 +12,7 @@
  */
 
 #include <linux/kernel.h>
+#include <linux/module.h>
 #include <linux/math64.h>
 
 #include <mtk_idle.h>
@@ -42,14 +43,20 @@ int __attribute__((weak)) mtk_idle_cond_append_info(
 
 /* idle ratio */
 static bool idle_ratio_en;
+module_param(idle_ratio_en, bool, 0644);
+MODULE_PARM_DESC(idle_ratio_en, "Enable idle ratio profiling");
 static unsigned long long idle_ratio_profile_start_time;
 static unsigned long long idle_ratio_profile_duration;
 
 /* idle block information */
 static unsigned long long idle_block_log_prev_time;
 static unsigned int idle_block_log_time_criteria = 5000;    /* 5 sec */
+module_param(idle_block_log_time_criteria, uint, 0644);
+MODULE_PARM_DESC(idle_block_log_time_criteria, "Idle block log interval (ms)");
 static unsigned long long idle_cnt_dump_prev_time;
 static unsigned int idle_cnt_dump_criteria = 5000;          /* 5 sec */
+module_param(idle_cnt_dump_criteria, uint, 0644);
+MODULE_PARM_DESC(idle_cnt_dump_criteria, "Idle count dump interval (ms)");
 
 /*External weak functions: implemented in mtk_cpufreq_api.c*/
 unsigned int __attribute__((weak))

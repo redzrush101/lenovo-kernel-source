@@ -3239,11 +3239,11 @@ static struct buffer_head *ext4_get_first_dir_block(handle_t *handle,
 					int *inlined)
 {
 	struct buffer_head *bh;
+	struct ext4_dir_entry_2 *de;
+	unsigned int offset;
 
     if (!ext4_has_inline_data(inode)) {
         bh = ext4_read_dirblock(inode, 0, EITHER);
-        struct ext4_dir_entry_2 *de;
-        unsigned int offset;
 
         /* The first directory block must not be a hole. */
 		if (IS_ERR(bh)) {

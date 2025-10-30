@@ -69,6 +69,8 @@ mt_gpufreq_get_cur_freq(void)
 /* Global Variable */
 /* ************************************ */
 static bool enable_ThermalMonitor;
+module_param(enable_ThermalMonitor, bool, 0644);
+MODULE_PARM_DESC(enable_ThermalMonitor, "Enable verbose THERMAL/PLATFORM logs");
 
 static DEFINE_MUTEX(MTM_SYSINFO_LOCK);
 

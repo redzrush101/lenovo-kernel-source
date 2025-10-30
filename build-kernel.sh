@@ -4,6 +4,7 @@
 # Compatible with 4.9.117 (current) and 4.9.337 (upgrade target)
 
 set -e
+set -o pipefail
 
 #==============================================================================
 # CONFIGURATION
@@ -25,6 +26,23 @@ OUT_DIR=${OUT_DIR:-"$(dirname "$KERNEL_DIR")/out/target/product/${PROJECT}/obj/K
 # Build options
 JOBS=${JOBS:-$(nproc --all)}
 VERBOSE=${VERBOSE:-0}  # Set to 1 for verbose output
+
+#==============================================================================
+# BOOT IMAGE CONFIGURATION (ported from ../Kernel-build.sh)
+#==============================================================================
+
+# Where to place generated boot images
+BOOT_IMG_DIR=${BOOT_IMG_DIR:-"$(dirname "$KERNEL_DIR")/boot_images"}
+
+# mkbootimg parameters (adjust via env if needed)
+BOOT_BASE=${BOOT_BASE:-0x40000000}
+BOOT_KERNEL_OFFSET=${BOOT_KERNEL_OFFSET:-0x00080000}
+BOOT_RAMDISK_OFFSET=${BOOT_RAMDISK_OFFSET:-0x11b00000}
+BOOT_SECOND_OFFSET=${BOOT_SECOND_OFFSET:-0x00f00000}
+BOOT_TAGS_OFFSET=${BOOT_TAGS_OFFSET:-0x07880000}
+BOOT_PAGESIZE=${BOOT_PAGESIZE:-2048}
+BOOT_CMDLINE=${BOOT_CMDLINE:-"bootopt=64S3,32N2,64N2 buildvariant=user"}
+SKIP_BOOTIMG=${SKIP_BOOTIMG:-0}
 
 #==============================================================================
 # TOOLCHAIN DETECTION
@@ -230,6 +248,69 @@ verify_build() {
     echo "================================================="
 }
 
+create_boot_image() {
+    [ "$SKIP_BOOTIMG" = "1" ] && {
+        echo "[INFO] Skipping boot image creation (SKIP_BOOTIMG=1)";
+        return 0;
+    }
+
+    echo "================================================="
+    echo "Creating boot image"
+    echo "================================================="
+
+    local kernel_image="$OUT_DIR/arch/arm64/boot/Image.gz-dtb"
+    if [ ! -f "$kernel_image" ]; then
+        echo "[WARN] Kernel image not found: $kernel_image"
+        return 1
+    fi
+
+    local MKBOOTIMG_TOOL=""
+    if command -v mkbootimg-osm0sis >/dev/null 2>&1; then
+        MKBOOTIMG_TOOL="mkbootimg-osm0sis"
+    elif command -v mkbootimg >/dev/null 2>&1; then
+        MKBOOTIMG_TOOL="mkbootimg"
+    else
+        echo "[WARN] No mkbootimg tool found; skipping boot image creation"
+        echo "       Install one of: mkbootimg-osm0sis or AOSP mkbootimg"
+        return 0
+    fi
+
+    mkdir -p "$BOOT_IMG_DIR"
+    local timestamp
+    timestamp=$(date +%Y%m%d_%H%M%S)
+    local output_img="$BOOT_IMG_DIR/boot_${timestamp}.img"
+    local latest_link="$BOOT_IMG_DIR/boot_latest.img"
+
+    echo "Using $MKBOOTIMG_TOOL with:"
+    echo "  --kernel        $kernel_image"
+    echo "  --base          $BOOT_BASE"
+    echo "  --kernel_offset $BOOT_KERNEL_OFFSET"
+    echo "  --ramdisk_offset $BOOT_RAMDISK_OFFSET"
+    echo "  --second_offset $BOOT_SECOND_OFFSET"
+    echo "  --tags_offset   $BOOT_TAGS_OFFSET"
+    echo "  --pagesize      $BOOT_PAGESIZE"
+    echo "  --cmdline       $BOOT_CMDLINE"
+    echo "  -o              $output_img"
+
+    if "$MKBOOTIMG_TOOL" \
+        --kernel "$kernel_image" \
+        --base "$BOOT_BASE" \
+        --kernel_offset "$BOOT_KERNEL_OFFSET" \
+        --ramdisk_offset "$BOOT_RAMDISK_OFFSET" \
+        --second_offset "$BOOT_SECOND_OFFSET" \
+        --tags_offset "$BOOT_TAGS_OFFSET" \
+        --pagesize "$BOOT_PAGESIZE" \
+        --cmdline "$BOOT_CMDLINE" \
+        -o "$output_img"; then
+        ln -sf "$(basename "$output_img")" "$latest_link"
+        echo "[OK] Boot image created: $output_img"
+        echo "[OK] Latest symlink:     $latest_link"
+    else
+        echo "[ERROR] mkbootimg-osm0sis failed"
+        return 1
+    fi
+}
+
 show_next_steps() {
     echo ""
     echo "Build Complete!"
@@ -312,6 +393,7 @@ main() {
     build_modules
     install_modules
     verify_build
+    create_boot_image || echo "[WARN] Boot image creation failed; kernel build succeeded"
     show_next_steps
 }
 

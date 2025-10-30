@@ -64,7 +64,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		rem = do_div(t, USEC_PER_SEC); \
 	})
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))
 int trace_fence_update_enabled_callback(void);
 #else
 void trace_fence_update_enabled_callback(void);
@@ -111,7 +111,7 @@ TRACE_EVENT_FN(rogue_fence_update,
 	trace_fence_update_disabled_callback
 );
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))
 int trace_fence_check_enabled_callback(void);
 #else
 void trace_fence_check_enabled_callback(void);
@@ -186,7 +186,7 @@ TRACE_EVENT(rogue_create_fw_context,
 
 void PVRGpuTraceEnableUfoCallback(void);
 void PVRGpuTraceDisableUfoCallback(void);
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))
 int PVRGpuTraceEnableUfoCallbackWrapper(void);
 #else
 #define PVRGpuTraceEnableUfoCallbackWrapper \
@@ -399,7 +399,7 @@ TRACE_EVENT(rogue_events_lost,
 
 void PVRGpuTraceEnableFirmwareActivityCallback(void);
 void PVRGpuTraceDisableFirmwareActivityCallback(void);
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))
 int PVRGpuTraceEnableFirmwareActivityCallbackWrapper(void);
 #else
 #define PVRGpuTraceEnableFirmwareActivityCallbackWrapper \

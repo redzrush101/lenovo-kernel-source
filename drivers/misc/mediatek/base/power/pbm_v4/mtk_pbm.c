@@ -42,6 +42,8 @@
 
 #ifndef DISABLE_PBM_FEATURE
 static bool mt_pbm_debug;
+module_param(mt_pbm_debug, bool, 0644);
+MODULE_PARM_DESC(mt_pbm_debug, "Enable PBM debug logs");
 
 static int mt_pbm_log_divisor;
 static int mt_pbm_log_counter;

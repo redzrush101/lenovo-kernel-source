@@ -233,12 +233,17 @@ verify_build() {
     echo ""
     echo "Build warnings summary:"
     if [ -f "$OUT_DIR/build.log" ]; then
-        local warn_count=$(grep -c "warning:" "$OUT_DIR/build.log" || echo "0")
-        local err_count=$(grep -c "error:" "$OUT_DIR/build.log" || echo "0")
+        # Robustly count warnings/errors; default to 0 and ensure numeric
+        local warn_count
+        local err_count
+        warn_count=$(grep -c "warning:" "$OUT_DIR/build.log" 2>/dev/null || printf 0)
+        err_count=$(grep -c " error:" "$OUT_DIR/build.log" 2>/dev/null || printf 0)
+        warn_count=${warn_count%% *}
+        err_count=${err_count%% *}
         echo "  Warnings: $warn_count"
         echo "  Errors: $err_count"
-        
-        if [ "$err_count" -gt 0 ]; then
+
+        if [ "${err_count:-0}" -gt 0 ] 2>/dev/null; then
             echo ""
             echo "[ERROR] Build had errors! Check $OUT_DIR/build.log"
             exit 1

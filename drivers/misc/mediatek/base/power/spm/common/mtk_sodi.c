@@ -23,6 +23,12 @@
 static bool sodi_feature_enable = MTK_IDLE_FEATURE_ENABLE_SODI;
 static bool sodi_bypass_idle_cond;
 static unsigned int sodi_flag = MTK_IDLE_LOG_REDUCE;
+module_param(sodi_feature_enable, bool, 0644);
+MODULE_PARM_DESC(sodi_feature_enable, "Enable SODI idle feature");
+module_param(sodi_bypass_idle_cond, bool, 0644);
+MODULE_PARM_DESC(sodi_bypass_idle_cond, "Bypass SODI idle condition checks");
+module_param(sodi_flag, uint, 0644);
+MODULE_PARM_DESC(sodi_flag, "SODI log flag");
 
 unsigned long so_cnt[NR_CPUS] = {0};
 static unsigned long so_block_cnt[NR_REASONS] = {0};
@@ -33,6 +39,14 @@ static bool sodi3_bypass_idle_cond;
 static bool sodi3_bypass_pwm_check;
 static unsigned int sodi3_force_vcore_lp_mode;
 static unsigned int sodi3_flag = MTK_IDLE_LOG_REDUCE;
+module_param(sodi3_feature_enable, bool, 0644);
+MODULE_PARM_DESC(sodi3_feature_enable, "Enable SODI3 idle feature");
+module_param(sodi3_bypass_idle_cond, bool, 0644);
+MODULE_PARM_DESC(sodi3_bypass_idle_cond, "Bypass SODI3 idle condition checks");
+module_param(sodi3_bypass_pwm_check, bool, 0644);
+MODULE_PARM_DESC(sodi3_bypass_pwm_check, "Bypass SODI3 PWM check");
+module_param(sodi3_flag, uint, 0644);
+MODULE_PARM_DESC(sodi3_flag, "SODI3 log flag");
 
 unsigned long so3_cnt[NR_CPUS] = {0};
 static unsigned long so3_block_cnt[NR_REASONS] = {0};
